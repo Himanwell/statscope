@@ -64,8 +64,6 @@ statscope/
 ├── requirements.txt # Python dependencies
 └── README.md # Project documentation
 
-yaml
-Copy code
 
 ---
 
@@ -142,19 +140,7 @@ AI‑generated recommendations
 
 Export to Word / PowerPoint
 
-🤝 Contributing
-Contributions are welcome!
 
-Fork the repo
-
-Create a new branch
-
-Make your changes
-
-Submit a pull request
-
-📜 License
-MIT License — free to use, modify, and share.
 
 🙌 Author
 Ogunkoya Emmanuel Oluwakemi
@@ -162,3 +148,4 @@ Built with ❤️ using Python & Streamlit
 
 If you find this useful, feel free to ⭐ the repo and share it!
 ```
+
