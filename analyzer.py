@@ -229,6 +229,45 @@ def generate_pdf_report(dataset_name, overview, numeric, corr_matrix, categories
         c.drawImage(ImageReader(buf), margin_x, y - 120, 300, 120)
         y -= 150
 
+
+    # --------------------------------------------------
+    # Correlation Heatmap
+    # --------------------------------------------------
+
+    if corr_matrix is not None and not corr_matrix.empty:
+        if y < 300:
+            new_page()
+
+        c.setFont("Helvetica-Bold", 13)
+        c.drawString(margin_x, y, "Correlation Heatmap")
+        y -= 20
+
+        fig, ax = plt.subplots(figsize=(4, 4))
+        sns.heatmap(
+            corr_matrix,
+            annot=True,
+            cmap="coolwarm",
+            fmt=".2f",
+            ax=ax
+            )
+        ax.set_title("Correlation Matrix")
+        
+        buf = BytesIO()
+        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        buf.seek(0)
+        
+        c.drawImage(
+            ImageReader(buf),
+            margin_x,
+            y - 260,
+            width=300,
+            height=260
+            )
+        y -= 280
+
+
     c.save()
     buffer.seek(0)
     return buffer
+
