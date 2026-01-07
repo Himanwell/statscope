@@ -7,11 +7,30 @@ import pandas as pd
 import textwrap
 import matplotlib.pyplot as plt
 import seaborn as sns
+import re
 
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from io import BytesIO
+
+
+# Helpers
+
+
+def clean_numeric_series(series: pd.Series) -> pd.Series:
+    """
+    Attempts to clean common numeric formats:
+    - Commas: 1,200
+    - Currency symbols: ₦5,000, $300
+    - Percentages: 45%
+    """
+    cleaned = (
+        series.astype(str)
+        .str.replace(r"[,%₦$€£]", "", regex=True)
+        .str.strip()
+    )
+    return pd.to_numeric(cleaned, errors="coerce")
 
 
 # Dataset overview
@@ -56,9 +75,9 @@ def generate_numeric_insight(column, series, beginner=True):
 
     if beginner:
         return (
-            f"This column shows {column}. "
-            f"Most values are around {mean:.1f}. "
-            f"Values usually fall between {min_val:.1f} and {max_val:.1f}."
+            f"This column represents **{column}**. "
+            f"Most values are around **{mean:.1f}**. "
+            f"Typical values fall between **{min_val:.1f}** and **{max_val:.1f}**."
         )
 
     return f"For {column}, the mean is {mean:.2f}."
@@ -71,8 +90,20 @@ def is_likely_identifier(series, column_name, df):
 
 def analyze_numeric_columns(df, max_columns=3, beginner=True):
     results = []
-    for col in df.select_dtypes(include="number").columns:
+
+    # Step 1: include real numeric columns
+    numeric_cols = list(df.select_dtypes(include="number").columns)
+
+    # Step 2: attempt to CLEAN object columns that look numeric
+    for col in df.select_dtypes(include="object").columns:
+        cleaned = clean_numeric_series(df[col])
+        if cleaned.notna().mean() > 0.6:  # majority numeric
+            df[col] = cleaned
+            numeric_cols.append(col)
+
+    for col in numeric_cols:
         series = df[col].dropna()
+
         if series.empty or is_likely_identifier(series, col, df):
             continue
 
@@ -101,9 +132,10 @@ def find_correlations(df, threshold=0.5):
     numeric = df.select_dtypes(include="number")
     if numeric.shape[1] < 2:
         return []
-    corr = numeric.corr()
 
+    corr = numeric.corr()
     results = []
+
     for i in range(len(corr.columns)):
         for j in range(i + 1, len(corr.columns)):
             if abs(corr.iloc[i, j]) >= threshold:
@@ -133,9 +165,9 @@ def analyze_categorical_columns(df, max_columns=2):
         })
     return results
 
-# --------------------------------------------------
+
 # PDF REPORT
-# --------------------------------------------------
+
 
 def generate_pdf_report(dataset_name, overview, numeric, corr_matrix, categories):
 
@@ -150,7 +182,7 @@ def generate_pdf_report(dataset_name, overview, numeric, corr_matrix, categories
         y = height - 50
         c.setFont("Helvetica", 11)
 
-    # TITLE
+    # Title
     c.setFont("Helvetica-Bold", 16)
     c.drawString(margin_x, y, "Statscope Report")
     y -= 25
@@ -159,7 +191,7 @@ def generate_pdf_report(dataset_name, overview, numeric, corr_matrix, categories
     c.drawString(margin_x, y, f"Dataset: {dataset_name}")
     y -= 30
 
-    # OVERVIEW
+    # Overview
     c.setFont("Helvetica", 11)
     c.drawString(margin_x, y, f"Rows: {overview['total_rows']}")
     y -= 15
@@ -168,7 +200,7 @@ def generate_pdf_report(dataset_name, overview, numeric, corr_matrix, categories
     c.drawString(margin_x, y, f"Date range: {overview['date_range']}")
     y -= 30
 
-    # NUMERIC
+    # Numeric
     c.setFont("Helvetica-Bold", 13)
     c.drawString(margin_x, y, "Numeric Insights")
     y -= 20
@@ -196,22 +228,6 @@ def generate_pdf_report(dataset_name, overview, numeric, corr_matrix, categories
 
         c.drawImage(ImageReader(buf), margin_x, y - 120, 300, 120)
         y -= 150
-
-    # CORRELATION HEATMAP
-    if corr_matrix is not None:
-        new_page()
-        c.setFont("Helvetica-Bold", 13)
-        c.drawString(margin_x, y, "Correlation Heatmap")
-        y -= 20
-
-        fig, ax = plt.subplots(figsize=(4, 4))
-        sns.heatmap(corr_matrix, cmap="coolwarm", ax=ax)
-        buf = BytesIO()
-        fig.savefig(buf, format="png", dpi=150)
-        plt.close(fig)
-        buf.seek(0)
-
-        c.drawImage(ImageReader(buf), margin_x, y - 300, 300, 300)
 
     c.save()
     buffer.seek(0)
