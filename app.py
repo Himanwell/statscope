@@ -33,6 +33,15 @@ st.title("📊 Statscope")
 st.write("Upload a CSV or Excel file to get clear, human‑friendly insights.")
 st.caption("Supported formats: CSV, Excel (.xlsx, .xls)")
 
+
+
+
+# Controls
+
+
+
+
+
 uploaded_file = st.file_uploader(
     "Choose a data file",
     type=["csv", "xlsx", "xls"]
@@ -43,13 +52,31 @@ explain_like_new = st.toggle(
     value=True
 )
 
+use_sample = st.checkbox("📊 Use sample dataset (no upload needed)")
 
-# File loading
+if not use_sample and uploaded_file is None:
+    st.info(
+        "🤔 Got no dataset to test with?\n\n"
+        "Use the **sample dataset** above by checking the box above to explore Statscope instantly — "
+        "no upload needed."
+        )
 
 
-if uploaded_file:
+
+# Dataset loading
+
+
+df = None
+dataset_name = None
+
+if use_sample:
+    df = pd.read_csv("data/sample_dataset.csv")
+    dataset_name = "Sample Dataset"
+    st.info("Using built‑in sample dataset")
+
+elif uploaded_file:
     file_name = uploaded_file.name.lower()
-    dataset_name = uploaded_file.name  
+    dataset_name = uploaded_file.name
 
     try:
         if file_name.endswith(".csv"):
@@ -73,8 +100,11 @@ if uploaded_file:
         st.stop()
 
 
-    # App content
 
+# App content (only runs if df exists)
+
+
+if df is not None:
 
     st.success(f"Loaded {len(df):,} rows × {len(df.columns)} columns")
 
@@ -92,6 +122,7 @@ if uploaded_file:
         f"- Date range: **{overview['date_range']}**"
     )
 
+
     # 2️⃣ Data quality
     st.subheader("2️⃣ Data Quality")
     missing = check_missing_data(df)
@@ -102,9 +133,11 @@ if uploaded_file:
             st.write(
                 f"- **{item['column']}**: "
                 f"{item['count']} missing ({item['percentage']:.1f}%)"
-            )
+                )
     else:
         st.success("No missing data found.")
+
+
 
     # 3️⃣ Numeric insights
     st.subheader("3️⃣ What the numbers are telling you")
@@ -172,22 +205,19 @@ if uploaded_file:
 
     st.markdown("---")
 
- 
-    #  PDF download
- 
+    # PDF download
     corr_matrix = get_correlation_matrix(df)
 
     pdf = generate_pdf_report(
         dataset_name,
         overview,
         numeric_analysis,
-        corr_matrix,  
+        corr_matrix,
         categories,
     )
 
-
     st.download_button(
-        " Download PDF report",
+        "📄 Download PDF report",
         data=pdf,
         file_name="Statscope report.pdf",
         mime="application/pdf",
@@ -196,4 +226,4 @@ if uploaded_file:
     st.success("Analysis complete ✔️")
 
 else:
-    st.info("Upload a data file to begin.")
+    st.info("Upload a data file or use the sample dataset to begin.")
