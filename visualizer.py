@@ -72,3 +72,4 @@ def create_category_bar_chart(value_counts, column_name):
 
     plt.tight_layout()
     return fig
+
